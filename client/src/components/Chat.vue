@@ -52,6 +52,7 @@ export default {
       messages: [],
       nameEntered: false,
       storeName: true,
+      isSendingMessage: false,
     };
   },
   methods: {
@@ -59,7 +60,8 @@ export default {
       this.$refs.input.focus();
     },
     async sendMessage() {
-      if (this.message.trim()) {
+      if (this.message.trim() && !this.isSendingMessage) {
+        this.isSendingMessage = true;
         await fetch(host + '/sendMessage.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -71,6 +73,7 @@ export default {
         this.message = '';
         this.fetchMessages(true, true); // Fetch new messages after sending
         await this.focusInput();
+        this.isSendingMessage = false;
       }
     },
     sendMessageOnEnter(event) {
@@ -176,7 +179,7 @@ html, body {
   height: 100%;
 }
 
-html, body, div, input {
+html, body, div, input, button {
   font-family: 'Montserrat', sans-serif;
 }
 
