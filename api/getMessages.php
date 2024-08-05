@@ -1,6 +1,5 @@
 <?php
 
-include 'cors.php';
 include 'db.php';
 
 $pdo = getDb();
