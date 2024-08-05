@@ -41,7 +41,7 @@
 </template>
 
 <script>
-const host = 'http://php-chat/api';
+const host = 'http://php-chat';
 
 export default {
   data() {
