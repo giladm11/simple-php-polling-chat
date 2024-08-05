@@ -25,7 +25,7 @@
           <transition-group name="list" tag="div">
             <div v-for="msg in messages" :key="msg.id" class="message" :class="{'message-enter': msg.new}">
               <div class="message-content">
-                <span :style="{ color: getNameColor(msg.name) }" class="name">{{ msg.name }}</span>: {{ msg.message }}
+                <span :style="{ color: getNameColor(msg.name) }" class="name">{{ decodeHtmlEntities(msg.name) }}</span>: {{ decodeHtmlEntities(msg.message) }}
               </div>
               <div class="timestamp">{{ new Date(msg.date).toLocaleTimeString() }}</div>
             </div>
@@ -132,6 +132,11 @@ export default {
           this.fetchMessages();
         }, 1000);
       }
+    },
+    decodeHtmlEntities(str) {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = str;
+      return textarea.value;
     },
     setName() {
       if (this.tempName.trim()) {
