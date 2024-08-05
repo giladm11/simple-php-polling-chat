@@ -20,7 +20,7 @@
       <div class="chat-header">
         <h1>Guess Who Is The AI</h1>
       </div>
-      <div class="chat-body" ref="chatBody">
+      <div class="chat-body" ref="chatBody" @scroll="setBottom">
         <div class="messages">
           <transition-group name="list" tag="div">
             <div v-for="msg in messages" :key="msg.id" class="message" :class="{'message-enter': msg.new}">
@@ -53,9 +53,14 @@ export default {
       nameEntered: false,
       storeName: true,
       isSendingMessage: false,
+      isOnBottom: false,
     };
   },
   methods: {
+    setBottom() {
+      let container = this.$refs.chatBody;
+      this.isOnBottom = container ? container.scrollHeight - container.offsetHeight - container.scrollTop < 1 : false;
+    },
     focusInput() {
       this.$refs.input.focus();
     },
@@ -71,14 +76,12 @@ export default {
           })
         });
         this.message = '';
-        this.fetchMessages(true, true); // Fetch new messages after sending
         await this.focusInput();
         this.isSendingMessage = false;
       }
     },
     sendMessageOnEnter(event) {
       if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent new line in textarea
         this.sendMessage();
       }
     },
@@ -112,11 +115,7 @@ export default {
 
         this.messages = messagesToPut;
 
-        let container = this.$refs.chatBody;
-        
-        const isAtBottom = container ? container.scrollHeight - container.offsetHeight - container.scrollTop < 1 : false;
-
-        if (isFirstFetch || isAtBottom) {
+        if (isFirstFetch || this.isOnBottom) {
           await this.$nextTick();
           this.scrollToBottom();
         }
@@ -131,7 +130,7 @@ export default {
       if (!onlyOnce) {
         setTimeout(() => {
           this.fetchMessages();
-        }, 2000);
+        }, 1000);
       }
     },
     setName() {
@@ -162,13 +161,23 @@ export default {
     scrollToBottom() {
       const chatBody = this.$refs.chatBody;
       chatBody.scrollTop = chatBody.scrollHeight;
+    },
+    handleResize() {
+      if (this.isOnBottom) {
+        this.scrollToBottom();
+      }
     }
   },
   mounted() {
+    window.addEventListener('resize', this.handleResize);
+
     if (this.name) {
       this.nameEntered = true;
       this.fetchMessages(true);
     }
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>
@@ -194,7 +203,7 @@ html, body, div, input, button {
   color: white;
   padding: 15px;
   text-align: center;
-  font-size: 24px;
+  font-size: 1rem;
   border-radius: 10px;;
 }
 
@@ -335,6 +344,7 @@ html, body, div, input, button {
 
 .chat-holder {
   height: calc(100vh - 20px);
+  height: calc(100dvh - 20px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
